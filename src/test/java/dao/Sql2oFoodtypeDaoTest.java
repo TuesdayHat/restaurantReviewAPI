@@ -1,5 +1,6 @@
 package dao;
 
+import com.sun.org.apache.regexp.internal.RE;
 import models.Foodtype;
 import models.Restaurant;
 import org.junit.After;
@@ -56,6 +57,25 @@ public class Sql2oFoodtypeDaoTest {
         foodtypeDao.add(foodtype);
         foodtypeDao.deleteById(foodtype.getId());
         assertEquals(0, foodtypeDao.getAll().size());
+    }
+
+    @Test
+    public void addFoodTypeToRestaurantAddsTypeCorrectly() throws Exception {
+
+        Restaurant testRestaurant = setupRestaurant();
+        Restaurant altRestaurant = setupAltRestaurant();
+
+        restaurantDao.add(testRestaurant);
+        restaurantDao.add(altRestaurant);
+
+        Foodtype testFoodtype = setupNewFoodtype();
+
+        foodtypeDao.add(testFoodtype);
+
+        foodtypeDao.addFoodtypeToRestaurant(testFoodtype, testRestaurant);
+        foodtypeDao.addFoodtypeToRestaurant(testFoodtype, altRestaurant);
+
+        assertEquals(2, foodtypeDao.getAllRestaurantsForAFoodtype(testFoodtype.getId()).size());
     }
 
 
