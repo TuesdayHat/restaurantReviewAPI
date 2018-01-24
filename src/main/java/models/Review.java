@@ -1,10 +1,11 @@
 package models;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
 
-/**
- * Created by epicodus_staff on 7/25/17.
- */
 public class Review {
 
     private int id;
@@ -12,6 +13,7 @@ public class Review {
     private int rating;
     private String content;
     private int restaurantId;
+    private long createdat;
 
     public Review(String writtenBy, int rating, String content, int restaurantId) {
         this.writtenBy = writtenBy;
@@ -58,6 +60,13 @@ public class Review {
 
     public void setRestaurantId(int restaurantId) {
         this.restaurantId = restaurantId;
+    }
+
+    public void setCreatedat() {
+        this.createdat = System.currentTimeMillis();
+    }
+    public long getCreatedat() {
+        return createdat;
     }
 
     @Override

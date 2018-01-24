@@ -17,16 +17,18 @@ public class Sql2oReviewDao implements ReviewDao {
 
     @Override
     public void add(Review review) {
-        String sql = "INSERT INTO reviews (writtenby, rating, createdat, restaurantid) VALUES (:writtenBy, :rating, :createdAt, :restaurantId)";
+        String sql = "INSERT INTO reviews (writtenby, rating, restaurantid) VALUES (:writtenBy, :rating, :restaurantId)";
+//        System.out.println("Sql2oReviewDao add method s running");
         try (Connection con = sql2o.open()) {
             int id = (int) con.createQuery(sql)
                     .bind(review)
                     .executeUpdate()
                     .getKey();
+            System.out.println("id: "+ id);
             review.setId(id);
         } catch (Sql2oException ex) {
             System.out.println(ex);
-        }
+        }//TDO: put createdat back in sql
     }
 
     @Override
