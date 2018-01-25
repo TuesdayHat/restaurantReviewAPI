@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS reviews (
  writtenby VARCHAR,
  content VARCHAR,
  rating VARCHAR,
- restaurantid INTEGER
+ restaurantid INTEGER,
+ createdat BIGINT
 );
 
 CREATE TABLE IF NOT EXISTS restaurants_foodtypes (

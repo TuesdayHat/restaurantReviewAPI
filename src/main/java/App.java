@@ -52,7 +52,7 @@ public class App {
             Review review = gson.fromJson(req.body(), Review.class);
             review.setCreatedat();
             review.setRestaurantId(restaurantId); //why do I need to get set separately?
-            System.out.println(review.getContent() + " --- " + review.getId());
+//            System.out.println(review.getContent() + " --- " + review.getId());
             reviewDao.add(review);
             res.status(201);
             return gson.toJson(review);
@@ -83,7 +83,70 @@ public class App {
 
 
             List<Review> allReviews = reviewDao.getAllReviewsByRestaurant(restaurantId);
-            System.out.println(allReviews.get(0).getContent());
+//            System.out.println(allReviews.get(0).getContent());
+            return gson.toJson(allReviews);
+        });
+
+        get("/restaurants/:id/foodtypes", "application/json", (request, response) -> {
+            int restaurantId = Integer.parseInt(request.params("id"));
+            Restaurant restaurantToFind = restaurantDao.findById(restaurantId);
+            if (restaurantToFind == null){
+                throw new ApiException(404, String.format("No restaurant with the id: \'%s\' exists", request.params("id")));
+            } else if (restaurantDao.getAllFoodtypesByRestaurant(restaurantId).size()==0){
+                return "{\"message\":\"I'm sorry, but no food types are listed for this restaurant.\"}";
+            } else {
+                return gson.toJson(restaurantDao.getAllFoodtypesByRestaurant(restaurantId));
+            }
+        });
+
+        get("/foodtypes/:id/restaurants", "application/json", (request, response) -> {
+            int foodtypeId = Integer.parseInt(request.params("id"));
+            Foodtype foodtypeToFind = foodtypeDao.findById(foodtypeId);
+            if (foodtypeToFind == null){
+                throw new ApiException(404, String.format("No foodtype with the id: \"%s\" exists", request.params("id")));
+            }
+            else if (foodtypeDao.getAllRestaurantsForAFoodtype(foodtypeId).size()==0){
+                return "{\"message\":\"I'm sorry, but no restaurants are listed for this foodtype.\"}";
+            }
+            else {
+                return gson.toJson(foodtypeDao.getAllRestaurantsForAFoodtype(foodtypeId));
+            }
+        });
+
+        post("/restaurants/:restaurantId/foodtype/:foodtypeId", "application/json", (request, response) -> {
+            int restaurantId = Integer.parseInt(request.params("restaurantId"));
+            int foodtypeId = Integer.parseInt(request.params("foodtypeId"));
+            Restaurant restaurant = restaurantDao.findById(restaurantId);
+            Foodtype foodtype = foodtypeDao.findById(foodtypeId);
+
+            if (restaurant != null && foodtype != null) {
+                foodtypeDao.addFoodtypeToRestaurant(foodtype, restaurant);
+                response.status(201);
+                return gson.toJson(String.format("Restaurant '%s' and Foodtype '%s' have been associated", restaurant.getName(), foodtype.getName()));
+            } else {
+                throw new ApiException(404, String.format("Restaurant or Foodtype does not exist"));
+            }
+        });
+
+        post("/restaurants/:restaurantId/reviews/new", "application/json", (request, response) -> {
+            int restaurantId = Integer.parseInt(request.params("restaurantId"));
+            Review review = gson.fromJson(request.body(), Review.class);
+            review.setCreatedat();
+            review.setFormattedCreatedAt();
+            review.setRestaurantId(restaurantId);
+            reviewDao.add(review);
+            response.status(201);
+            return gson.toJson(review);
+        });
+
+        get("/restaurants/:id/sortedReviews", "application/json", (req, res) -> { //// TODO: 1/18/18 generalize this route so that it can be used to return either sorted reviews or unsorted ones.
+            int restaurantId = Integer.parseInt(req.params("id"));
+            Restaurant restaurantToFind = restaurantDao.findById(restaurantId);
+            List<Review> allReviews;
+            if (restaurantToFind == null){
+                throw new ApiException(404, String.format("No restaurant with the id: \"%s\" exists", req.params("id")));
+            }
+            allReviews = reviewDao.getAllReviewsByRestaurantSortedNewestToOldest(restaurantId);
             return gson.toJson(allReviews);
         });
 

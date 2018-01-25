@@ -6,7 +6,7 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 
-public class Review {
+public class Review implements Comparable<Review>{
 
     private int id;
     private String writtenBy;
@@ -14,12 +14,26 @@ public class Review {
     private String content;
     private int restaurantId;
     private long createdat;
+    private String formattedCreatedAt;
 
-    public Review(String writtenBy, int rating, String content, int restaurantId) {
+    public Review(String writtenBy, int rating, String nContent, int restaurantId) {
         this.writtenBy = writtenBy;
         this.rating = rating;
-        this.content = content;
+        this.content = nContent;
         this.restaurantId = restaurantId;
+        this.createdat = System.currentTimeMillis();
+        setFormattedCreatedAt();
+    }
+
+    @Override
+    public int compareTo(Review reviewObject) {
+        if (this.createdat < reviewObject.createdat) {
+            return -1;
+        } else if (this.createdat > reviewObject.createdat) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 
     public int getId() {
@@ -69,6 +83,20 @@ public class Review {
         return createdat;
     }
 
+    public String getFormattedCreatedAt(){
+        Date date = new Date(createdat);
+        String datePatternToUse = "MM/dd/yyyy @ K:mm a";
+        SimpleDateFormat sdf = new SimpleDateFormat(datePatternToUse);
+        return sdf.format(date);
+    }
+
+    public void setFormattedCreatedAt(){
+        Date date = new Date(this.createdat);
+        String datePatternToUse = "MM/dd/yyyy @ K:mm a";
+        SimpleDateFormat sdf = new SimpleDateFormat(datePatternToUse);
+        this.formattedCreatedAt = sdf.format(date);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -76,17 +104,19 @@ public class Review {
 
         Review review = (Review) o;
 
+        if (id != review.id) return false;
         if (rating != review.rating) return false;
         if (restaurantId != review.restaurantId) return false;
-        if (!writtenBy.equals(review.writtenBy)) return false;
-        return content.equals(review.content);
+        if (writtenBy != null ? !writtenBy.equals(review.writtenBy) : review.writtenBy != null) return false;
+        return content != null ? content.equals(review.content) : review.content == null;
     }
 
     @Override
     public int hashCode() {
-        int result = writtenBy.hashCode();
+        int result = id;
+        result = 31 * result + (writtenBy != null ? writtenBy.hashCode() : 0);
         result = 31 * result + rating;
-        result = 31 * result + content.hashCode();
+        result = 31 * result + (content != null ? content.hashCode() : 0);
         result = 31 * result + restaurantId;
         return result;
     }

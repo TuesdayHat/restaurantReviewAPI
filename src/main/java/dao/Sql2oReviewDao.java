@@ -6,6 +6,7 @@ import org.sql2o.Sql2o;
 import org.sql2o.Sql2oException;
 
 
+import java.util.ArrayList;
 import java.util.List;
 public class Sql2oReviewDao implements ReviewDao {
 
@@ -17,14 +18,12 @@ public class Sql2oReviewDao implements ReviewDao {
 
     @Override
     public void add(Review review) {
-        String sql = "INSERT INTO reviews (writtenby, rating, restaurantid) VALUES (:writtenBy, :rating, :restaurantId)";
-//        System.out.println("Sql2oReviewDao add method s running");
+        String sql = "INSERT INTO reviews (writtenby, content, createdat, rating, restaurantid) VALUES (:writtenBy, :content, :createdat, :rating, :restaurantId)";
         try (Connection con = sql2o.open()) {
             int id = (int) con.createQuery(sql)
                     .bind(review)
                     .executeUpdate()
                     .getKey();
-            System.out.println("id: "+ id);
             review.setId(id);
         } catch (Sql2oException ex) {
             System.out.println(ex);
@@ -60,4 +59,31 @@ public class Sql2oReviewDao implements ReviewDao {
         }
     }
 
+    @Override
+    public List<Review> getAllReviewsByRestaurantSortedNewestToOldest(int restaurantId) {
+        List<Review> unsortedReviews = getAllReviewsByRestaurant(restaurantId);
+        List<Review> sortedReviews = new ArrayList<>();
+        int i = 1;
+        for (Review review : unsortedReviews) {
+//            int comparisonResult;
+            if (i == unsortedReviews.size()){
+                if(review.compareTo(unsortedReviews.get(i-1)) == -1){
+                sortedReviews.add(0, unsortedReviews.get(i-1));
+                }
+                break;
+            } else {
+                if (review.compareTo(unsortedReviews.get(i)) == -1) {
+                    sortedReviews.add(0, unsortedReviews.get(i));
+                    i++;
+                } else if (review.compareTo(unsortedReviews.get(i)) == 0) {
+                    sortedReviews.add(0, unsortedReviews.get(i));
+                    i++;
+                } else {
+                    sortedReviews.add(0, unsortedReviews.get(i));
+                }
+            }
+        }
+        return sortedReviews;
+
+    }
 }
